@@ -1,0 +1,70 @@
+using System;
+using System.Linq;
+using System.IO;
+using System.Text;
+using System.Collections;
+using System.Collections.Generic;
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+class Solution
+{
+    static void Main(string[] args)
+    {
+        string message1 = Console.ReadLine();
+        string message2 = Console.ReadLine();
+        string message3 = Console.ReadLine();
+
+        // Write an answer using Console.WriteLine()
+        // To debug: Console.Error.WriteLine("Debug messages...");
+
+        string m1b = HexToBinary(message1);
+        string m2b = HexToBinary(message2);
+        string m3b = HexToBinary(message3);
+
+        Console.WriteLine(BinaryToText(XORBinaryStrings(XORBinaryStrings(m1b, m2b), m3b)));
+    }
+
+    static string HexToBinary(string hex)
+    {
+        StringBuilder binaryString = new StringBuilder();
+
+        foreach (char hexChar in hex)
+        {
+            int decimalValue = Convert.ToInt32(hexChar.ToString(), 16);
+            string binaryValue = Convert.ToString(decimalValue, 2).PadLeft(4, '0');
+            binaryString.Append(binaryValue);
+        }
+
+        return binaryString.ToString();
+    }
+
+    static string XORBinaryStrings(string bin1, string bin2)
+    {
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < bin1.Length; i++)
+        {
+            char xorBit = (bin1[i] == bin2[i]) ? '0' : '1';
+            result.Append(xorBit);
+        }
+
+        return result.ToString();
+    }
+
+    static string BinaryToText(string binary)
+    {
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < binary.Length; i += 8)
+        {
+            string byteString = binary.Substring(i, 8);
+            int asciiValue = Convert.ToInt32(byteString, 2);
+            result.Append((char)asciiValue);
+        }
+
+        return result.ToString();
+    }
+}
