@@ -1,0 +1,31 @@
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
+public class CodeWars {
+  public static string crack(string hash) {
+    using (MD5 md5 = MD5.Create()) {
+      for (int i = 0; i <= 99999; i++) {
+        string pin = i.ToString("D5");
+        string computedHash = GetMd5Hash(md5, pin);
+
+        if (computedHash.Equals(hash, StringComparison.OrdinalIgnoreCase)) {
+          return pin;
+        }
+      }
+    }
+
+    return "";
+  }
+
+  private static string GetMd5Hash(MD5 md5, string input) {
+    byte[] data = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < data.Length; i++) {
+      sb.Append(data[i].ToString("x2"));
+    }
+
+    return sb.ToString();
+  }
+}
