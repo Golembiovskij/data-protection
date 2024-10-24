@@ -1,0 +1,38 @@
+using System;
+using System.Linq;
+
+public class CodeWars
+{
+    public static string Encode(string text)
+    {
+        string bits = string.Concat(text.Select(c =>
+        {
+            string binary = Convert.ToString(c, 2).PadLeft(8, '0');
+            return string.Concat(binary.Select(bit => new string(bit, 3)));
+        }));
+
+        return bits;
+    }
+
+    public static string Decode(string bits)
+    {
+        var triplets = Enumerable.Range(0, bits.Length / 3).Select(i => bits.Substring(i * 3, 3));
+
+        string correctedBits = string.Concat(triplets.Select(triplet =>
+        {
+            int count0 = triplet.Count(c => c == '0');
+            int count1 = triplet.Count(c => c == '1');
+            return count0 > count1 ? '0' : '1';
+        }));
+
+        var byteGroups = Enumerable.Range(0, correctedBits.Length / 8).Select(i => correctedBits.Substring(i * 8, 8));
+
+        string text = string.Concat(byteGroups.Select(byteStr =>
+        {
+            int asciiValue = Convert.ToInt32(byteStr, 2);
+            return (char)asciiValue;
+        }));
+
+        return text;
+    }
+}
