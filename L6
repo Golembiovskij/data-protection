@@ -1,0 +1,67 @@
+using System;
+using System.Text;
+using System.Linq;
+
+public class CodeWars
+{
+   public static string Scanner(int[][] qrcode)
+{
+    int rows = qrcode.Length;
+    int cols = qrcode[0].Length;
+
+    for (int x = 0; x < rows; x++)
+    {
+        for (int y = 0; y < cols; y++)
+        {
+            if ((x + y) % 2 == 0)
+            {
+                qrcode[x][y] = qrcode[x][y] == 0 ? 1 : 0;
+            }
+        }
+    }
+
+        int[] bits = new int[76];
+        int i = 0;
+      
+        for (i = 0; i < 12; i++)
+        {
+          bits[i*2] = qrcode[20-i][20];
+          bits[i*2+1] = qrcode[20-i][19];
+        }
+      
+        for (i = 0; i < 12; i++)
+        {
+          bits[24+i*2] = qrcode[9+i][18];
+          bits[24+i*2+1] = qrcode[9+i][17];
+        }
+      
+        for (i = 0; i < 12; i++)
+        {
+          bits[48+i*2] = qrcode[20-i][16];
+          bits[48+i*2+1] = qrcode[20-i][15];
+        }
+      
+        for (i = 0; i < 2; i++)
+        {
+          bits[72+i*2] = qrcode[17+i][14];
+          bits[72+i*2+1] = qrcode[17+i][13];
+        }
+      
+      string stringbits = string.Join("", bits);
+      int mlength = Convert.ToInt32(stringbits.Substring(4, 8), 2);
+      
+      string mbits = stringbits.Substring(12, 64);
+      
+      
+      StringBuilder asciiString = new StringBuilder();
+
+     for (i = 0; i < mlength * 8 && i + 8 <= mbits.Length; i += 8)
+     {
+       string byteString = mbits.Substring(i, 8);
+       int byteValue = Convert.ToInt32(byteString, 2);
+       asciiString.Append((char)byteValue);
+     }
+     
+     return asciiString.ToString();
+    }
+  }
