@@ -1,0 +1,101 @@
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+
+class Program
+{
+    public static byte[] AesCtrEncrypt(byte[] plainText, byte[] key, byte[] iv)
+    {
+        using (var aes = new AesManaged())
+        {
+            aes.Key = key;
+            aes.IV = iv;
+
+            using (var encryptor = aes.CreateEncryptor())
+            using (var ms = new MemoryStream())
+            {
+                // Генерація лічильника
+                byte[] counter = new byte[16]; // 128 біт
+                Buffer.BlockCopy(iv, 0, counter, 0, iv.Length);
+
+                for (int i = 0; i < plainText.Length; i += 16)
+                {
+                    // Шифруємо лічильник
+                    byte[] encryptedCounter = encryptor.TransformFinalBlock(counter, 0, counter.Length);
+
+                    // XOR з відкритим текстом
+                    int blockSize = Math.Min(16, plainText.Length - i);
+                    byte[] encryptedBlock = new byte[blockSize];
+                    for (int j = 0; j < blockSize; j++)
+                    {
+                        encryptedBlock[j] = (byte)(plainText[i + j] ^ encryptedCounter[j]);
+                    }
+                    ms.Write(encryptedBlock, 0, encryptedBlock.Length);
+
+                    // Збільшуємо лічильник
+                    IncrementCounter(counter);
+                }
+
+                return ms.ToArray();
+            }
+        }
+    }
+
+    public static byte[] AesCtrDecrypt(byte[] cipherText, byte[] key, byte[] iv)
+    {
+        // Розшифрування у режимі CTR є таким же, як і шифрування
+        return AesCtrEncrypt(cipherText, key, iv);
+    }
+
+    private static void IncrementCounter(byte[] counter)
+    {
+        for (int i = counter.Length - 1; i >= 0; i--)
+        {
+            if (counter[i] < 255)
+            {
+                counter[i]++;
+                break;
+            }
+            counter[i] = 0;
+        }
+    }
+
+    static void Main(string[] args)
+    {
+        byte[] key = new byte[16]; // 128 бітний ключ
+        using (var rng = new RNGCryptoServiceProvider())
+        {
+            rng.GetBytes(key);
+        }
+
+        byte[] iv = new byte[16]; // Ініціалізаційний вектор (IV)
+        using (var rng = new RNGCryptoServiceProvider())
+        {
+            rng.GetBytes(iv);
+        }
+
+        // Запит користувача на введення тексту
+        Console.WriteLine("Введіть текст для шифрування:");
+        string originalText = Console.ReadLine();
+        byte[] plainText = Encoding.UTF8.GetBytes(originalText);
+
+        // Шифрування
+        byte[] cipherText = AesCtrEncrypt(plainText, key, iv);
+        Console.WriteLine("Зашифрований текст: " + BitConverter.ToString(cipherText).Replace("-", ""));
+
+        // Розшифрування
+        byte[] decryptedText = AesCtrDecrypt(cipherText, key, iv);
+        Console.WriteLine("Розшифрований текст: " + Encoding.UTF8.GetString(decryptedText));
+
+        // Перевірка
+        if (originalText == Encoding.UTF8.GetString(decryptedText))
+        {
+            Console.WriteLine("Перевірка успішна!");
+        }
+        else
+        {
+            Console.WriteLine("Перевірка не вдалася.");
+        }
+    }
+}
