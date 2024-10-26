@@ -1,0 +1,45 @@
+def mod_pow(base, exponent, mod):
+    result = 1
+    base = base % mod
+    while exponent > 0:
+        if (exponent & 1) == 1:
+            result = (result * base) % mod
+        exponent >>= 1
+        base = (base * base) % mod
+    return result
+
+def mod_inverse(a, m):
+    m0, x0, x1 = m, 0, 1
+    if m == 1:
+        return 0
+    while a > 1:
+        q = a // m
+        m, a = a % m, m
+        x0, x1 = x1 - q * x0, x0
+    if x1 < 0:
+        x1 += m0
+    return x1
+
+def discrete_log(G, H, Q):
+    m = int(Q**0.5) + 1
+    baby_steps = {}
+
+    for j in range(m):
+        value = mod_pow(G, j, Q)
+        if value not in baby_steps:
+            baby_steps[value] = j
+
+    g_inv_m = mod_pow(mod_inverse(G, Q), m, Q)
+
+    for i in range(m):
+        value = (H * mod_pow(g_inv_m, i, Q)) % Q
+        if value in baby_steps:
+            return i * m + baby_steps[value]
+
+    return None
+
+G, H, Q = map(int, input().split())
+result = discrete_log(G, H, Q)
+
+if result is not None:
+    print(result)
